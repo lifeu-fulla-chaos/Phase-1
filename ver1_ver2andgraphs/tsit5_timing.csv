@@ -1,0 +1,6 @@
+metric,duration
+Connection Time,300 milliseconds
+Data Reception Time,3622 milliseconds
+Sync Time,9886 milliseconds
+Simulation Time,8138 milliseconds
+Total Time,22599 milliseconds
