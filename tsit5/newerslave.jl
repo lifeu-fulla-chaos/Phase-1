@@ -46,7 +46,6 @@ function run_synchronization()
         end
         println("Slave: Connected to master.")
 
-        # Receive master states (not dx/dt) from the master
         master_x = []
         while true
             line = try
@@ -66,7 +65,7 @@ function run_synchronization()
             end
             push!(master_x, x)
         end
-        close(client)  # Close connection after receiving all data
+        close(client)  
 
         if isempty(master_x)
             println("Slave: No data received. Exiting.")
@@ -79,65 +78,35 @@ function run_synchronization()
         e_traj = zeros(3, n_steps)
         y_current = copy(y0)
 
-        # Simulate slave system with backstepping control
         for (i, t) in enumerate(t_eval)
-            x = synch_master[i, :]  # Get master state at current time
-            
-            # Calculate control input
+            x = synch_master[i, :] 
             u, e = backstepping_control(x, y_current, p)
             
-            # Solve slave system for one time step
             prob_slave = ODEProblem(lorenz_slave!, y_current, (t, t+dt), (p..., x, u))
             sol_slave = solve(prob_slave, Tsit5())
             
-            # Store results
             y_current = sol_slave.u[end]
             y_traj[:, i] = y_current
             e_traj[:, i] = e
         end
-        prob_slave = ODEProblem(lorenz_slave!, y_current, (7.0, 100.0), (p..., master_x[1, :], zeros(3)))
-        sol_slave = solve(prob_slave, Tsit5(), saveat=dt)
-        y1_traj = hcat(sol_slave.u...)
-        println("Generating plots...")
-        t_eval1 = 7.0:dt:100.0
-        println(size(y1_traj))
-        println(size(master_x))
-        a = master_x[7001:end, :]
-        println(size(a))
-        e1 = transpose(a) - y1_traj
-        # Plotting trajectories and errors
+
         for j in 1:3
-            # State trajectories
             p1 = plot(t_eval, [synch_master[:, j] y_traj[j, :]], 
                  label=["Master $("xyz"[j])" "Slave $("xyz"[j])"],
                  xlabel="Time", ylabel="State", 
                  title="Master-Slave Trajectories: Component $("xyz"[j])")
             savefig(p1, "trajectory$("xyz"[j]).png")
             
-            # Error plots
             p2 = plot(t_eval, e_traj[j, :], 
                  label="Error $("xyz"[j])", 
                  xlabel="Time", ylabel="Error",
                  title="Synchronization Error: Component $("xyz"[j])")
             savefig(p2, "error$("xyz"[j]).png")
             
-            p4 = plot(t_eval1,[a[:, j] y1_traj[j, :]], 
-                 label=["Master $("xyz"[j])" "Slave $("xyz"[j])"],
-                 xlabel="Time", ylabel="State", 
-                 title="Master-Slave Trajectories: Component $("xyz"[j])")
-            savefig(p4, "trajectory1$("xyz"[j]).png")
-
-            p5 = plot(t_eval1, e1[j, :], 
-                 label="Error $("xyz"[j])", 
-                 xlabel="Time", ylabel="Error",
-                 title="Synchronization Error: Component $("xyz"[j])")
-            savefig(p5, "error1$("xyz"[j]).png")
         end
 
         println("All plots have been saved.")
         break
-    end # End of while loop
-end # End of function run_synchronization
-
-# Run the synchronization
+    end
+end
 run_synchronization()
