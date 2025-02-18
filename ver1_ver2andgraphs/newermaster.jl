@@ -29,7 +29,7 @@ end
 # Solve using Tsit5
 println("Solving master system...")
 prob_master = ODEProblem(lorenz_master!, x0, tspan)
-sol_master = solve(prob_master, Tsit5(), saveat=dt)
+sol_master = solve(prob_master, Tsit5(), dtmax=dt)
 
 function run_master()
     server = listen(2000)

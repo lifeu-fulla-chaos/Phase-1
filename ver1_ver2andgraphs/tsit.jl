@@ -98,7 +98,7 @@ function run_synchronization_tsit5()
             end
             
             prob = ODEProblem(lorenz_slave!, y_current, (t, t+dt), (σ, ρ, β, x, u))
-            sol = solve(prob, Tsit5())
+            sol = solve(prob, Tsit5(), dtmax=dt)
             y_current = sol.u[end]
             y_traj[:, i] = y_current
             e_traj[:, i] = e
