@@ -1,0 +1,8 @@
+a model to predict initial conditions
+encrpyt the parameters using initial conditions
+once you have init decrpyt the parameters
+ggs
+
+pinns too slow
+seq2seq 
+make it lite
