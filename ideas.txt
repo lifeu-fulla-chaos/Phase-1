@@ -6,3 +6,6 @@ ggs
 pinns too slow
 seq2seq 
 make it lite
+
+
+model cant be too accurate, so we actually encrpyt init conditions and parameters, make the model predict upto some precision and send it
